@@ -1,5 +1,7 @@
 package proyectoGym.demo.service;
+import proyectoGym.demo.entidad.Clase;
 import proyectoGym.demo.entidad.Usuario;
+import proyectoGym.demo.repository.ClaseRepository;
 import proyectoGym.demo.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -10,8 +12,9 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
 
     // Inyección de dependencias por constructor (Buena práctica de ingeniería)
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository,ClaseRepository claseRepository) {
         this.usuarioRepository = usuarioRepository;
+        this.claseRepository = claseRepository;
     }
 
     // 1. Crear o Guardar Usuario (C)
@@ -47,5 +50,16 @@ public class UsuarioService {
             usuario.setActivo(false); // Cambiamos el boolean a false
             usuarioRepository.save(usuario);
         });
+    }
+    //------para el perfil del usuario vea las clases
+    // Acordate de inyectar el ClaseRepository en el constructor de tu UsuarioService si no lo tenías
+    private final ClaseRepository claseRepository;
+
+    // Método para el perfil del alumno
+    public List<Clase> obtenerMisClases(Long usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+        return claseRepository.findByUsuariosInscritosId(usuarioId);
     }
 }

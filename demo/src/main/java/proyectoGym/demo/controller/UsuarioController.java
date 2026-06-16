@@ -1,4 +1,5 @@
 package proyectoGym.demo.controller;
+import proyectoGym.demo.entidad.Clase;
 import proyectoGym.demo.entidad.Usuario;
 import proyectoGym.demo.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class UsuarioController {
     }
 
     // 2. LEER TODOS: GET http://localhost:8080/api/usuarios
-  @GetMapping("http://localhost:8080/api/usuarios")
+  @GetMapping
     public ResponseEntity<List<Usuario>> obtenerTodos() {
         return ResponseEntity.ok(usuarioService.obtenerTodos());
     }
@@ -53,5 +54,15 @@ public class UsuarioController {
     public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
         usuarioService.eliminarUsuario(id);
         return ResponseEntity.noContent().build(); // Devuelve un estado 204 (Sin contenido)
+    }
+    //--vista del cliente
+    // 3. MIS CLASES (PERFIL): GET http://localhost:8080/api/usuarios/{usuarioId}/clases
+    @GetMapping("/{usuarioId}/clases")
+    public ResponseEntity<List<Clase>> obtenerMisClases(@PathVariable Long usuarioId) {
+        try {
+            return ResponseEntity.ok(usuarioService.obtenerMisClases(usuarioId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 }
