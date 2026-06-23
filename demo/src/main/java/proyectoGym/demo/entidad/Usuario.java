@@ -28,5 +28,8 @@ public class Usuario {
     private String telefono;
 
     @Column(nullable = false)
+    private String password; // - Nueva columna requerida para el login y registro
+
+    @Column(nullable = false)
     private Boolean activo = true; // Por defecto, el usuario arranca activo
 }

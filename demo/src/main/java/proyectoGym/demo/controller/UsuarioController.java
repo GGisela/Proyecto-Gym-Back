@@ -1,68 +1,80 @@
 package proyectoGym.demo.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import proyectoGym.demo.entidad.Clase;
 import proyectoGym.demo.entidad.Usuario;
 import proyectoGym.demo.service.UsuarioService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/usuarios") // URL base para todos los endpoints de este controlado
+@RequestMapping("/api/usuarios")
 public class UsuarioController {
+
     private final UsuarioService usuarioService;
 
-    // Inyección del servicio por constructor
+    // Inyección por constructor (siguiendo la misma buena práctica que en el Service)
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
 
-    // 1. CREAR: POST http://localhost:8080/api/usuarios
-    @PostMapping
-    public ResponseEntity<Usuario> crearUsuario(@RequestBody Usuario usuario) {
-        Usuario nuevoUsuario = usuarioService.guardarUsuario(usuario);
-        return ResponseEntity.ok(nuevoUsuario);
+    // 1. REGISTRO / CREAR (El que ya tenías, perfecto)
+    @PostMapping("/registrar")
+    public ResponseEntity<?> registrarUsuario(@RequestBody Usuario usuario) {
+        try {
+            Usuario nuevoUsuario = usuarioService.guardarUsuario(usuario);
+            return ResponseEntity.ok(nuevoUsuario);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"" + e.getMessage() + "\"}");
+        }
     }
 
-    // 2. LEER TODOS: GET http://localhost:8080/api/usuarios
-  @GetMapping
+    // 2. LEER TODOS (Para la tabla del Administrador)
+    @GetMapping
     public ResponseEntity<List<Usuario>> obtenerTodos() {
-        return ResponseEntity.ok(usuarioService.obtenerTodos());
+        List<Usuario> usuarios = usuarioService.obtenerTodos();
+        return ResponseEntity.ok(usuarios);
     }
 
-    // 3. LEER UNO POR ID: GET http://localhost:8080/api/usuarios/{id}
+    // 3. LEER POR ID (Por si querés consultar un socio específico)
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
         return usuarioService.obtenerPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 4. ACTUALIZAR: PUT http://localhost:8080/api/usuarios/{id}
+    // 4. ACTUALIZAR (Para el editar del Administrador)
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @RequestBody Usuario datosNuevos) {
+    public ResponseEntity<?> actualizarUsuario(@PathVariable Long id, @RequestBody Usuario datosNuevos) {
         try {
             Usuario usuarioActualizado = usuarioService.actualizarUsuario(id, datosNuevos);
             return ResponseEntity.ok(usuarioActualizado);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
 
-    // 5. BORRAR (Lógico): DELETE http://localhost:8080/api/usuarios/{id}
+    // 5. BORRADO LÓGICO (Para el eliminar booleano del Administrador)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
-        usuarioService.eliminarUsuario(id);
-        return ResponseEntity.noContent().build(); // Devuelve un estado 204 (Sin contenido)
-    }
-    //--vista del cliente
-    // 3. MIS CLASES (PERFIL): GET http://localhost:8080/api/usuarios/{usuarioId}/clases
-    @GetMapping("/{usuarioId}/clases")
-    public ResponseEntity<List<Clase>> obtenerMisClases(@PathVariable Long usuarioId) {
+    public ResponseEntity<?> eliminarUsuario(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(usuarioService.obtenerMisClases(usuarioId));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(null);
+            usuarioService.eliminarUsuario(id);
+            return ResponseEntity.ok().body("{\"message\": \"Usuario desactivado correctamente\"}");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"" + e.getMessage() + "\"}");
+        }
+    }
+
+    // 6. VER CLASES DEL SOCIO (Para el perfil del alumno)
+    @GetMapping("/{id}/clases")
+    public ResponseEntity<?> obtenerMisClases(@PathVariable Long id) {
+        try {
+            List<Clase> clases = usuarioService.obtenerMisClases(id);
+            return ResponseEntity.ok(clases);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
 }
