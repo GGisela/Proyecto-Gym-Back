@@ -17,7 +17,8 @@ FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
 # Copiamos el archivo JAR compilado desde la etapa anterior
-COPY --from=build /app/target/*.jar app.jar
+
+COPY --from=build /app/**/target/*.jar app.jar
 
 # Render asigna dinámicamente un puerto mediante la variable de entorno PORT,
 # pero exponemos el 8080 por estándar local
