@@ -6,9 +6,11 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copiamos el código fuente y compilamos el .jar saltando los tests
-COPY src ./src
-RUN mvn clean package -DskipTests
+# Cambiá la línea del pom si está adentro de una subcarpeta (ej: demo)
+COPY demo/pom.xml .
+
+# Y cambiá la línea 10 para que apunte a esa subcarpeta
+COPY demo/src ./src
 
 # --- Etapa 2: Ejecución (Runtime) ---
 FROM eclipse-temurin:17-jre-jammy
